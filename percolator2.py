@@ -144,14 +144,14 @@ class PercolationPlayer:
 					eb = e.b
 					if ea == v or eb == v:
 						if ea.color == player or eb.color == player:
-							val1 += 2
+							val1 += -3
 						elif ea.color == 1 - player or eb.color == 1 - player:
 							val1 += -1
 						val2 -=1
 				if val2 == val1:
 					val2 = val2 * 2
 
-		
+				
 
 				#g = copyGraph(graph)
 				#util.GetVertex(g, v.index).color = player
@@ -194,7 +194,7 @@ class PercolationPlayer:
 		#print(w)
 		#print (graph.GetVertex(w[1]))
 				return util.GetVertex(graph, w[1])
-		elif size <= 24:
+		elif size <= 20:
 			m = PercolationPlayer.vremove(graph, player)
 			return util.GetVertex(graph, m[1].index)
 		
