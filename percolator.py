@@ -96,7 +96,7 @@ def memoizePoint(f):
 
 def memoizeM(f):
 	global mcache
-	def gM(m, player, alpha = -1, beta = 2, maximizingPlayer=1):
+	def gM(m, player, alpha = (-1, ), beta = (2, ), maximizingPlayer=1):
 		i = (tuple(m.keys()), tuple(m.values()), player, alpha, beta, maximizingPlayer)
 		if i not in mcache:
 			mcache[i] = f(m, player, alpha, beta, maximizingPlayer)
@@ -164,13 +164,14 @@ def wrapperM(graph, player):
 	#print(isLoss(m, 0, 0))
 	return turn1M(m, player)
 
-def turn1M(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
+def turn1M(matrix, player, alpha = (-1, ), beta = (2, ), maximizingPlayer = 1):
 	global cDict
 	global glen
 
-
+	a = 0
+	s = 0
 				
-	best = -1
+	best = (-1, )
 	vmax = None
 	
 	for v in matrix.keys():
@@ -178,6 +179,9 @@ def turn1M(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 			m = copy.copy(matrix)
 			PercolateMatrix(m, v)
 			val = auxwinnableM(m, player, alpha, beta, 0)[0]
+
+			s += val[0]
+			a += 1
 
 			if val > best:
 				best = val
@@ -189,18 +193,19 @@ def turn1M(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 			if beta <= alpha:
 				break	
 
-	return best, vmax
+	return (best[0], s / a), vmax
 
 @memoizeM
-def auxwinnableM(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
+def auxwinnableM(matrix, player, alpha = (-1, ), beta = (2, ), maximizingPlayer = 1):
 	global cDict
-
+	a = 0
+	s = 0
 	if isLoss(matrix, player, maximizingPlayer):
-		return 1 - maximizingPlayer, None
+		return (1 - maximizingPlayer, 1 - maximizingPlayer), None
 	
 	if maximizingPlayer:
 					
-		best = -1
+		best = (-1, )
 		vmax = None
 		
 		for v in matrix.keys():
@@ -208,6 +213,11 @@ def auxwinnableM(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 				m = copy.copy(matrix)
 				PercolateMatrix(m, v)
 				val = auxwinnableM(m, player, alpha, beta, 0)[0]
+				
+
+
+				s += val[0]
+				a += 1
 
 				if val > best:
 					best = val
@@ -218,12 +228,12 @@ def auxwinnableM(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 
 				if beta <= alpha:
 					break	
-		return best, vmax
+		return (best[0], s / a), vmax
 
 	else:
 		
 		
-		best = 2
+		best = (2, )
 		vmin = None
 
 		for v in matrix.keys():
@@ -232,9 +242,13 @@ def auxwinnableM(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 				PercolateMatrix(m, v)
 				val = auxwinnableM(m, player, alpha, beta, 1)[0]
 
+
 				if val < best:
 					best = val
 					vmin = v
+
+				s += val[0]
+				a += 1
 
 				if beta < best:
 					beta = best
@@ -242,8 +256,7 @@ def auxwinnableM(matrix, player, alpha = -1, beta = 2, maximizingPlayer = 1):
 				if beta <= alpha:
 					break
 
-		
-		return best, vmin
+		return (best[0], s / a), vmin
 
 def vremoveIsLoss(matrix, player):
 	for i in matrix.keys():
@@ -418,8 +431,7 @@ class PercolationPlayer:
 		if size <= 12:
 
 			w = wrapperM(graph, player)
-			if w[0]:
-				return util.GetVertex(graph, w[1])
+			return util.GetVertex(graph, w[1])
 
 		elif size <= 14:
 			m = vremoveWrapper(graph, player)
